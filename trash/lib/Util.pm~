@@ -1,0 +1,12 @@
+package Util;
+
+sub new 
+{
+	my $obj = {};
+	bless $obj; 
+	$obj->{'accion'} = '';
+	return $obj;
+}
+
+
+1;
