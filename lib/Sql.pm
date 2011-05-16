@@ -5,6 +5,7 @@ use warnings;
 use strict;
 use Scalar::Util qw(looks_like_number);
 
+use Config::Simple;
 my $static_obj = {};
 
 sub new 
@@ -14,12 +15,14 @@ sub new
 	
 	if (!$static_obj->{connect})
 	{
+		my $cfg = new Config::Simple();
+		$cfg->read('jost.conf') or die $cfg->error();	
 		 
 		bless $static_obj;
-		$static_obj->{server} = "localhost";
-		$static_obj->{user} = "root";
-		$static_obj->{passwd} = "root";
-		$static_obj->{dbname} = "nss";
+		$static_obj->{server} = $cfg->param("sql.host");
+		$static_obj->{user} = $cfg->param("sql.user");
+		$static_obj->{passwd} = $cfg->param("sql.password");
+		$static_obj->{dbname} = $cfg->param("sql.dbname");
 		$static_obj->{connect} = undef;
 		$static_obj->{tabla} = undef;
 		$static_obj->{field} = undef;
