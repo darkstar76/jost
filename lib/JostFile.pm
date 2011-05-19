@@ -3,10 +3,11 @@ package JostFile;
 use strict ;
 use warnings;
 use User;
+use File::Path qw(make_path remove_tree);
+
 
 sub new 
 {
-
 	my $self = {};
 	bless $self;
 	
@@ -21,7 +22,8 @@ sub mkhomedir
 	my $self = shift;
 	my $user = shift;
 	my $dir_  = $user->Get_homedir();
-	mkdir  '.'.$dir_;
+	
+	make_path '.'.$dir_ , {owner=>'dark', group=>'nogroup'};
 }
 
 1;

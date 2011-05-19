@@ -19,7 +19,7 @@ sub new
 		$cfg->read('jost.conf') or die $cfg->error();	
 		 
 		bless $static_obj;
-		$static_obj->{server} = $cfg->param("sql.host");
+		$static_obj->{server} = $cfg->param("sql.server");
 		$static_obj->{user} = $cfg->param("sql.user");
 		$static_obj->{passwd} = $cfg->param("sql.password");
 		$static_obj->{dbname} = $cfg->param("sql.dbname");
@@ -38,13 +38,11 @@ sub new
 
 sub Get_connect
 {
-	if(!$static_obj->{connect})
-	{ 
-		warn "SQL no cnnect\n";
-	}
 	
 	if(!$static_obj->{connect})
 	{
+		 
+		 
 		 $static_obj->{connect} = DBI->connect("dbi:mysql:database=$static_obj->{dbname};hostname=$static_obj->{server};port=3306","$static_obj->{user}","$static_obj->{passwd}");
 	}
 	

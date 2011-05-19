@@ -137,9 +137,14 @@ sub Get_homedir
 
 sub add
 {
+# Genera el string para para insertar Sql::StrInsert
+# Si se ejecuta con exito se debe devolver treu de lo contrario false
+# En proceso de implementar.
+
 	my $self = shift;
 	$self->_Set_uid(Sql::MaxId('uid','user'));
 	print Sql::StrInsert($self);
+
 }
 
 
