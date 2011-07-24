@@ -11,12 +11,14 @@ sub new
 	my $self = {};
 	bless $self;
 	
-	$self->{grop_id} = undef;
+	$self->{group_id} = undef;
 	$self->{group_name} = undef;
 	$self->{status} = undef;
 	$self->{group_password} = undef;
 	$self->{gid} = undef;
+	$self->{homedir} = undef;
 	
+	$self->{msg_error}=undef;
 	return $self;
 }
 
@@ -49,25 +51,68 @@ sub Get_grop_id
 	return $self->{group};
 }
 
+sub Get_homedir
+{
+	my $self = shift;  
+	$self->{homedir} = "/home/".$self->{group_name};
+	
+	return $self->{homedir};
+}
+
 sub Get
 {
+	my $ret;
 	my $self = shift;
-	my $sql = new Sql();
-	 
-	my $connect = $sql->Get_connect();
 	
-	my $str = "SELECT group_id,gid FROM groups where group_name = '". $self->{group_name} ."'";
+	my $row = Sql::select('groups','group_id,gid','group_name',$self->{group_name});
 	
-	my $sth = $connect->prepare($str);
-	$sth->execute();
-	my $row = $sth->fetchrow_hashref();	
-	$self->{grop_id} = $row->{group_id};
-	$self->{gid} = $row->{gid};
-	$sth->finish;
-	#falta cerrar laconection;
+	if ($row)
+	{
+		$self->{group_id} = $row->{group_id};
+		$self->{gid} = $row->{gid};
+		$ret = 1;
+	}
+	return $ret;
+	
+}
+
+sub Existe 
+{
+		my $val = $_[0];
+		my $self = shift;
+		my $ret = Sql::existe('groups','group_name',$self->{group_name});
+		
+		if(!$ret)
+		{
+			$self->Set_error("Dominio no exsiste");
+		}
+		return $ret;	
 }
 
 ########################################################################
+
+
+sub Set_error 
+{
+	my $self = shift;
+	my $msg = $_[0];
+	
+	$self->{msg_error} = "Error Dominio.pm: ".$msg;
+}
+sub Get_error 
+{
+	my $self = shift;
+	return $self->{msg_error};
+}
+
+sub existe_homedir
+{
+	my $ret;
+	
+
+	return $ret;
+}
+
 sub ToString
 {
 	my $self = shift;  

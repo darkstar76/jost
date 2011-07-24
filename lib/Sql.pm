@@ -43,7 +43,8 @@ sub Get_connect
 	{
 		 
 		 
-		 $static_obj->{connect} = DBI->connect("dbi:mysql:database=$static_obj->{dbname};hostname=$static_obj->{server};port=3306","$static_obj->{user}","$static_obj->{passwd}");
+		#$static_obj->{connect} = DBI->connect("dbi:mysql:database=$static_obj->{dbname};hostname=$static_obj->{server};port=3306","$static_obj->{user}","$static_obj->{passwd}");
+		$static_obj->{connect} = DBI->connect("dbi:mysql:database=$static_obj->{dbname};hostname=$static_obj->{server};port=3306","$static_obj->{user}");
 	}
 	
 	return $static_obj->{connect}; 	
@@ -55,12 +56,14 @@ sub MaxId
 	my $str = "SELECT max( " .$_[0].") as UID FROM ".$_[1];
 	
 	my $self = shift;
+	
 	my $sql = new Sql(); 
 	my $connect = $sql->Get_connect();
 	my $sth = $connect->prepare($str);
 	$sth->execute();
 	my $row = $sth->fetchrow_hashref();	
 	return ++$row->{UID};
+	
 }
 
 sub StrInsert
@@ -98,13 +101,57 @@ sub StrInsert
 	 
 	$_key = substr ($_key,0,(length $_key)-1);	
 	$_value = substr ($_value,0,(length $_value)-1);	
-	return "INSERT INTO USER (".$_key.") VALUE (".$_value.")";
+	return "insert into user (".$_key.") value (".$_value.")";
 	
 }
 
 sub insert
 {
-		;
+		my $str = $_[0];
+		my $sql = new Sql(); 
+		my $connect = $sql->Get_connect();
+		my $sth = $connect->prepare($str);
+		$sth->execute();
+}
+# Checkea si un registro en una tabla exite recibe parametro tabla y campo y valor
+sub existe
+{
+	my $tabla = $_[0];
+	my $campo = $_[1];
+	my $val = $_[2];
+	my $str = "select ".$campo." as campo FROM ".$tabla." where ".$campo." like "."'".$val."'";
+	my $ret;
+	
+	my $self = shift;
+	
+	my $sql = new Sql(); 
+	my $connect = $sql->Get_connect();
+	my $sth = $connect->prepare($str);
+	$sth->execute();
+	my $row = $sth->fetchrow_hashref();
+	
+	if($row->{'campo'})
+	{
+		$ret = 1;
+	}
+	
+	return $ret;
 	
 }
+
+sub select
+{
+	my $tabla = $_[0];
+	my $campos = $_[1];
+	my $clausura = $_[2];
+	my $val= $_[3];
+	
+	my $sql = new Sql(); 
+	my $connect = $sql->Get_connect();
+	my $str = "select ".$campos."  from ".$tabla." where ".$clausura." = "."'".$val."'";
+	my $sth = $connect->prepare($str);
+	$sth->execute();
+	return $sth->fetchrow_hashref();
+}
+
 1;

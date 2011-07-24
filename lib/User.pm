@@ -2,6 +2,7 @@ package User;
 
 use strict ;
 use warnings;
+use Switch;
 use MyUtil;
 use Domain;
 
@@ -15,14 +16,16 @@ sub new
 	$self->{id} = undef;
 	$self->{uid} = undef;
 	$self->{gid} = undef;
-	$self->{user_name} = undef;
+	$self->{user_name} = undef;	
 	$self->{realname} = undef;
 	$self->{domain} = undef;
 	$self->{password} = undef;
+	$self->{shell} = undef;
 	$self->{status} = undef;
-	$self->{field} = ['uid','gid','user_name','realname','password','status'];
-	$self->{control} = ['user_name','password','gid','cmd'];
+	$self->{field} = ['uid','gid','user_name','realname','password','shell','homedir','status'];
+	$self->{control} = ['user_name','password','domain'];
 	$self->{cmd} = undef;
+	$self->{msg_error} = undef;
 	return $self;
 }
 
@@ -30,7 +33,6 @@ sub Set_user_name
 {
 	my $self = shift;  
 	$self->{user_name} = $_[0];
-
 }
 
 sub Set_realname
@@ -43,8 +45,10 @@ sub Set_domain
 {
 	my $self = shift;  
 	$self->{domain} = $_[0];
+	
 	my $domain = new Domain();
 	$domain->Set_group_name($self->{domain});
+	
 	$domain->Get();
 	$self->_Set_gid($domain->Get_gid);
 }
@@ -110,23 +114,12 @@ sub Control
 	{
 		if (!$self->{$iter})
 		{
-			print "user->{".$iter."} undef\n";
+			$self->Set_error("En sub Control falta parametro obligatorio ".$iter);
 			undef $ret;
 		}	
 	}
 		
 	return $ret;
-}
-sub Set_cmd
-{
-	my $self = shift;  
-	$self->{cmd} = $_[0];
-}
-
-sub Get_cmd
-{
-	my $self = shift;  
-	return $self->{cmd};
 }
 
 sub Get_homedir
@@ -134,19 +127,69 @@ sub Get_homedir
 	my $self = shift;  
 	return $self->{homedir};
 }
+sub Get_user_name
+{
+	my $self = shift;
+	return $self->{user_name};
+}
+
+sub Get_domain
+{
+	my $self = shift;
+	return $self->{domain};
+}
+
+sub Get_uid
+{
+	my $self = shift;  
+	return $self->{uid};
+}
+
+sub Get_gid
+{
+	my $self = shift;  
+	return $self->{gid};
+}
 
 sub add
 {
 # Genera el string para para insertar Sql::StrInsert
 # Si se ejecuta con exito se debe devolver treu de lo contrario false
-# En proceso de implementar.
 
 	my $self = shift;
+	
 	$self->_Set_uid(Sql::MaxId('uid','user'));
-	print Sql::StrInsert($self);
+	Sql::insert(Sql::StrInsert($self));
+}
+#Checkea si usuario existe
+sub Existe
+{
+	my $self = shift;
+	my $ret = 0;
+	
+	if(Sql::existe("user","user_name",$self->Get_user_name))
+	{
+		$ret = 1;
+	}
+		
+	return $ret;
+	
+}
 
+sub Set_error 
+{
+	my $self = shift;
+	my $msg = $_[0];
+	
+	$self->{msg_error} = "Error Usuario.pm: ".$msg;
+}
+sub Get_error 
+{
+	my $self = shift;
+	return $self->{msg_error};
 }
 
 
 1;
+
 
